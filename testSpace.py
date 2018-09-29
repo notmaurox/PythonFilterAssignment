@@ -1,17 +1,16 @@
 import numpy as np
-from rangeFilter import rangeFilter
-from medianFilter import medianFilter
-from FilterClass import LIDARFilter
+from rangeFilterClass import rangeFilter
+from medianFilterClass import medianFilter
+from LIDARFilterClass import LIDARFilter
 
 class garbageFilter(LIDARFilter):
     def doNothing():
         print "yeet"
 
-rF = rangeFilter()
+LIDARFilter = LIDARFilter(0,100,0.0,99.0)
+rF = rangeFilter( LIDARFilter )
+mF = medianFilter( LIDARFilter, 3 )
 
-gF = garbageFilter()
-
-mF = medianFilter(3)
 print mF.update( np.array([0.0, 1.0, 2.0, 1.0, 3.0]) )
 print mF.update( np.array([1.0, 5.0, 7.0, 1.0, 3.0]) )
 print mF.update( np.array([2.0, 3.0, 4.0, 1.0, 0.0]) )
