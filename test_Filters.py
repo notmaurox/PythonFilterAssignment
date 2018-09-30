@@ -18,23 +18,15 @@ def test_median_example_output():
     expectedOutput3 = np.array([1.5,3.0,3.5,1.0,3.0])
     expectedOutput4 = np.array([2.5,3.0,4.0,1.0,1.5])
     
-    expectedOutputList = [expectedOutput0,expectedOutput1,expectedOutput2,expectedOutput3,expectedOutput4]
+    expectedOutputList = [expectedOutput0.tolist(),expectedOutput1.tolist(),expectedOutput2.tolist(),expectedOutput3.tolist(),expectedOutput4.tolist()]
     
     lFilter = LIDARFilter(0,100,0.0,99.0)
     mFilter = medianFilter(lFilter,3)
     
     recievedOutputList = []
     for inputArr in inputList:
-        recievedOutputList.append( mFilter.update(inputArr) )
+        recievedOutputList.append( mFilter.update(inputArr).tolist() )
     
-    areIdentical = np.array_equal(recievedOutputList, expectedOutputList)
-    
-    if areIdentical == False:
-        print "recieved median filter output"
-        print recievedOutputList
-        print "expected median filter output"
-        print expectedOutputList
-    
-    assert areIdentical == True
+    assert recievedOutputList == expectedOutputList
         
     
