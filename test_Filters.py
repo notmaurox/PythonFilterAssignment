@@ -2,6 +2,23 @@ from LIDARFilterClass import LIDARFilter
 from rangeFilterClass import rangeFilter
 from medianFilterClass import medianFilter
 import numpy as np
+import pytest
+
+def test_each_filter_has_update():
+    
+    class badFilter(LIDARFilter):
+        def __init__(self,LIDARFilter):
+            self.rangeN = LIDARFilter.rangeN
+            self.rangeDist = LIDARFilter.rangeDist
+            
+        def doNothing():
+            print "-1"
+    
+    lFilter = LIDARFilter(200,1000,0.03,50)    
+    bFilter = badFilter(lFilter)
+    
+    with pytest.raises(NotImplementedError):
+        bFilter.update( np.array([0.0,0.0,0.0]) )
 
 def test_median_example_output():
     providedInput0 = np.array([0.0, 1.0, 2.0, 1.0, 3.0]) 
