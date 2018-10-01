@@ -9,8 +9,15 @@ class rangeFilter(LIDARFilter):
         self.scansCorrected = 0
         self.updatesMade = 0
     
-    def update(self, numpyArray ):
+    def update(self, inArray ):
         
+        npArrayAsInput = True
+        if type(inArray) is list:
+            numpyArray = np.array( inArray ) 
+            npArrayAsInput = False
+        else:
+            numpyArray = inArray
+            
         if len(numpyArray) < self.rangeN[0] or len(numpyArray) > self.rangeN[1]:
             print "scan length falls outside accepted range"
             return -1
@@ -22,5 +29,9 @@ class rangeFilter(LIDARFilter):
             if value > self.rangeDist[1]:
                 value[...] = self.rangeDist[1]
                 self.updatesMade += 1
-        scansCorrected += 1
-        return numpyArray
+        self.scansCorrected += 1
+        
+        if npArrayAsInput == True:
+            return numpyArray
+        else:
+            return numpyArray.tolist()

@@ -8,4 +8,4 @@ class LIDARFilter:
         
     #Each filter object should have an update method
     def update( self, numpyArray ):
-        raise NotImplementedError()
+        raise NotImplementedError("update method not implemented in class")

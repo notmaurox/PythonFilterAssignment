@@ -10,7 +10,14 @@ class medianFilter(LIDARFilter):
         self.savedScans = []
         self.scansProcessed = -1
     
-    def update( self, numpyArray ):
+    def update( self, inArray ):
+        
+        npArrayAsInput = True
+        if type(inArray) is list:
+            numpyArray = np.array( inArray ) 
+            npArrayAsInput = False
+        else:
+            numpyArray = inArray
         
         if len(numpyArray) < self.rangeN[0] or len(numpyArray) > self.rangeN[1]:
             print "scan length falls outside accepted range"
@@ -21,12 +28,11 @@ class medianFilter(LIDARFilter):
         
         if self.scansProcessed == 0:
             self.savedScans = numpyArrayI
-            return numpyArray
+            return inArray
         else:
             self.savedScans = np.vstack([self.savedScans,numpyArrayI])
-        
-        median = []
-        median = np.array(median)
+    
+        median = np.array([])
         
         for i in range(self.savedScans.shape[1]-1):
             self.savedScans = self.savedScans[self.savedScans[:,i].argsort()]
@@ -35,7 +41,7 @@ class medianFilter(LIDARFilter):
                 midValBindex = (self.savedScans.shape[0]/2)-1
                 midValA = self.savedScans[midValAindex,i]
                 midValB = self.savedScans[midValBindex,i]
-                colMedian = ( midValA + midValB ) / 2 
+                colMedian = ( midValA + midValB ) / 2.0
             else:
                 colMedian = self.savedScans[self.savedScans.shape[0]/2,i]
             median = np.append(median,[colMedian])
@@ -45,4 +51,7 @@ class medianFilter(LIDARFilter):
         if self.savedScans.shape[0] > self.numSavedScans:
             self.savedScans = np.delete(self.savedScans,(0),axis=0)
         
-        return median
+        if npArrayAsInput == True:
+            return median
+        else:
+            return median.tolist()
