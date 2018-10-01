@@ -9,7 +9,13 @@ def smallRangeFilter():
     lidarFilter = LIDARFilter(0,100,0.03,50)
     rF = rangeFilter( lidarFilter )
     return rF
-
+    
+@pytest.fixture
+def smallMedianFilter():
+    lidarFilter = LIDARFilter(0,100,0.00,50)
+    mF = medianFilter( lidarFilter, 3 )
+    return mF
+    
 def test_each_filter_has_update():
     
     class badFilter(LIDARFilter):
@@ -41,33 +47,27 @@ def test_rangeFilter_numpyArray_preservation(smallRangeFilter):
     outPut = smallRangeFilter.update( np.array([0.02,1.0,51]) )
     assert type(outPut) == np.ndarray
     
-def test_medianFilter_median_is_avrg():
-    lidarFilter = LIDARFilter(0,100,0.00,50)
-    mF = medianFilter( lidarFilter, 3 )
-    
+def test_medianFilter_median_is_avrg(smallMedianFilter):
     inputArray = [[1,1,1,1],[2,2,2,2]]
     expectedOutput = [[1,1,1,1],[1.5,1.5,1.5,1.5]]
     recievedOutput = []
     
     for inputScan in inputArray:
-        recievedOutput.append( mF.update(inputScan) )
+        recievedOutput.append( smallMedianFilter.update(inputScan) )
         
     assert recievedOutput == expectedOutput
     
-def test_medianFilter_median_is_middle():
-    lidarFilter = LIDARFilter(0,100,0.00,50)
-    mF = medianFilter( lidarFilter, 3 )
-    
+def test_medianFilter_median_is_middle(smallMedianFilter):
     inputArray = [[3,3,3,3],[2,2,2,2],[1,1,1,1]]
     expectedOutput = [[3,3,3,3],[2.5,2.5,2.5,2.5],[2,2,2,2]]
     recievedOutput = []
     
     for inputScan in inputArray:
-        recievedOutput.append( mF.update(inputScan) )
+        recievedOutput.append( smallMedianFilter.update(inputScan) )
         
     assert recievedOutput == expectedOutput 
 
-def test_median_example_output():
+def test_median_example_output(smallMedianFilter):
     providedInput0 = [0.0, 1.0, 2.0, 1.0, 3.0]
     providedInput1 = [1.0, 5.0, 7.0, 1.0, 3.0]
     providedInput2 = [2.0, 3.0, 4.0, 1.0, 0.0]
@@ -84,24 +84,17 @@ def test_median_example_output():
     
     expectedOutputList = [expectedOutput0,expectedOutput1,expectedOutput2,expectedOutput3,expectedOutput4]
     
-    lFilter = LIDARFilter(0,100,0.0,99.0)
-    mFilter = medianFilter(lFilter,3)
-    
     recievedOutputList = []
     for inputArr in inputList:
-        recievedOutputList.append( mFilter.update(inputArr) )
+        recievedOutputList.append( smallMedianFilter.update(inputArr) )
     
     print recievedOutputList
     print expectedOutputList
     
     assert recievedOutputList == expectedOutputList
 
-def test_medianFilter_numpyArray_preservation():
-    lidarFilter = LIDARFilter(0,100,0.00,50)
-    mF = medianFilter( lidarFilter, 3 )
-    
-    outPut = mF.update( np.array([1,1,2,2]) )
-    
+def test_medianFilter_numpyArray_preservation(smallMedianFilter):    
+    outPut = smallMedianFilter.update( np.array([1,1,2,2]) )
     assert type(outPut) == np.ndarray   
         
     
