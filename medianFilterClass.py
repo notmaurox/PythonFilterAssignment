@@ -7,8 +7,9 @@ class medianFilter(LIDARFilter):
         self.rangeN = LIDARFilter.rangeN
         self.rangeDist = LIDARFilter.rangeDist
         self.numSavedScans = D
-        self.savedScans = []
+        self.savedScans = [[]]
         self.scansProcessed = -1
+        self.scanLength = -1
     
     def update( self, inArray ):
         
@@ -19,8 +20,9 @@ class medianFilter(LIDARFilter):
         else:
             numpyArray = inArray
         
-        if len(numpyArray) < self.rangeN[0] or len(numpyArray) > self.rangeN[1]:
-            print "scan length falls outside accepted range"
+        if not LIDARFilter.goodLength(self,inArray) or \
+                 (len(inArray) != self.scanLength and self.scansProcessed > -1):
+            print "length of inArray outside accepted range"
             return -1
         
         self.scansProcessed += 1
@@ -28,6 +30,7 @@ class medianFilter(LIDARFilter):
         
         if self.scansProcessed == 0:
             self.savedScans = numpyArrayI
+            self.scanLength = len(inArray)
             return inArray
         else:
             self.savedScans = np.vstack([self.savedScans,numpyArrayI])

@@ -6,13 +6,13 @@ import pytest
 
 @pytest.fixture
 def smallRangeFilter():
-    lidarFilter = LIDARFilter(0,100,0.03,50)
+    lidarFilter = LIDARFilter(1,100,0.03,50)
     rF = rangeFilter( lidarFilter )
     return rF
     
 @pytest.fixture
 def smallMedianFilter():
-    lidarFilter = LIDARFilter(0,100,0.00,50)
+    lidarFilter = LIDARFilter(1,100,0.00,50)
     mF = medianFilter( lidarFilter, 3 )
     return mF
     
@@ -43,9 +43,45 @@ def test_rangeFilter_update_max(smallRangeFilter):
     
     assert recievedOutput == expectedOutput
     
+def test_rangeFilter_longArray(smallRangeFilter):
+    badArray = [0]*101
+    expectedOutput = -1 #error code for bad input
+    recievedOutput = smallRangeFilter.update(badArray)
+    
+    assert expectedOutput == recievedOutput
+    
+def test_rangeFilter_shortArray(smallRangeFilter):
+    badArray = []
+    expectedOutput = -1 #error code for bad input
+    recievedOutput = smallRangeFilter.update(badArray)
+    
+    assert expectedOutput == recievedOutput
+    
 def test_rangeFilter_numpyArray_preservation(smallRangeFilter):
     outPut = smallRangeFilter.update( np.array([0.02,1.0,51]) )
     assert type(outPut) == np.ndarray
+
+def test_medianFilter_shortArray(smallMedianFilter):
+    badArray = []
+    expectedOutput = -1 #error code for bad input
+    recievedOutput = smallMedianFilter.update(badArray)
+    
+    assert expectedOutput == recievedOutput
+    
+def test_medianFilter_longArray(smallMedianFilter):
+    badArray = [0]*101
+    expectedOutput = -1 #error code for bad input
+    recievedOutput = smallMedianFilter.update(badArray)
+    
+    assert expectedOutput == recievedOutput
+    
+def test_medianFilter_inconsistent_arraySize(smallMedianFilter):
+    smallMedianFilter.update([1,1,1,1])
+    badArray = [0]*20
+    expectedOutput = -1 #error code for bad input
+    recievedOutput = smallMedianFilter.update(badArray)
+    
+    assert expectedOutput == recievedOutput
     
 def test_medianFilter_median_is_avrg(smallMedianFilter):
     inputArray = [[1,1,1,1],[2,2,2,2]]
@@ -67,7 +103,7 @@ def test_medianFilter_median_is_middle(smallMedianFilter):
         
     assert recievedOutput == expectedOutput 
 
-def test_median_example_output(smallMedianFilter):
+def test_medianFilter_example_output(smallMedianFilter):
     providedInput0 = [0.0, 1.0, 2.0, 1.0, 3.0]
     providedInput1 = [1.0, 5.0, 7.0, 1.0, 3.0]
     providedInput2 = [2.0, 3.0, 4.0, 1.0, 0.0]

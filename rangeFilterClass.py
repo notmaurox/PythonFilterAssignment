@@ -18,8 +18,8 @@ class rangeFilter(LIDARFilter):
         else:
             numpyArray = inArray
             
-        if len(numpyArray) < self.rangeN[0] or len(numpyArray) > self.rangeN[1]:
-            print "scan length falls outside accepted range"
+        if not LIDARFilter.goodLength(self,inArray):
+            print "length of inArray outside accepted range"
             return -1
         
         for value in np.nditer(numpyArray, op_flags=['readwrite']):
