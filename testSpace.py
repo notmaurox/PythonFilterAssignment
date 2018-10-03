@@ -5,7 +5,7 @@ from LIDARFilterClass import LIDARFilter
 
 class garbageFilter(LIDARFilter):
     def doNothing():
-        print "yeet"
+        print "doNothing method"
 
 LIDARFilter = LIDARFilter(0,100,0.0,99.0)
 rF = rangeFilter( LIDARFilter )

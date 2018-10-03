@@ -2,7 +2,7 @@ Author: Mauro Chavez
 Date: October 2, 2018
 Desc: Contains information on files LIDARFilterClass.py, medianFilter.py, 
 rangeFilter.py, and test_Filters.py written for the completion of a coding 
-challenge provided by Brain Corp as part of the interview process for a 
+challenge provided by Brain Corp. as part of the interview process for a 
 python test engineer position. 
 --------------------------------------------------------------------------------
 
@@ -13,9 +13,10 @@ The goal was to use this class to create parent objects that can be passed into
 constructors for subclass objects. This way, if a LIDAR filter is providing 
 scans of a certain length whose values must be within a certain range, 
 any filter could be initialized using a single LIDARFilter object, and from 
-there receive the same input parameters as they will all filter scans from the 
-same LIDAR sensor. This also allows for setting up the rule that all filter
-objects must have an update method. 
+there receive the same input parameters. This can be used to designate that 
+they will all filter scans from the same LIDAR sensor. This also allows for 
+setting up the rule that all filter objects must have an update method by 
+having the super class update method throw a not implemented error. 
 
 Class Attributes
 ----------------
@@ -44,10 +45,10 @@ __init__ (self, minRangeN, maxRangeN, minRangeDist, maxRangeDist):
   LIDARFilter object
 
 update( self, inArray ):
-  This method allows for the rule that any class that is a subclass of a 
-  LIDARFilter must also have an update method. In order to prevent the 
-  NotImplementedError, a subclass must have its own(complete) implementation of
-  update. 
+  This method allows for the rule, stated in assignment documentation that any
+  class that is a subclass of a LIDARFilter must also have an update method. 
+  In order to prevent the NotImplementedError, a subclass must have its 
+  own(complete) implementation of update. 
   
   Parameters
   inArray : list or numpy array of floats
@@ -69,7 +70,7 @@ FILE NAME: rangeFilterClass.py
 
 Contains Class: rangeFilter (subclass of LIDARFilter)
 Desc: Used for passing LIDAR scans into an update method that replaces values
-below and above defined limits with the min and max of 
+below and above defined limits with the min and max of that range. 
 
 Class Attributes
 ----------------
@@ -90,6 +91,11 @@ __init__(self,LIDARFilter):
   rangeFilter object
   
 update(self, inArray ):
+
+  Replaces values outside an acceptable value with the max of that range if 
+  above and the min of that range if below. Calls parent goodLength method to 
+  determine if array is allowed to be processed. 
+
   Parameters
   inArray : list or numpy array of values as floats
   
@@ -130,13 +136,14 @@ __init__(self, LIDARFilter, D):
   medianFilter Object
       
 update( self, inArray ):
-  Utilizes numpy to quickly sort a matrix by column to find median value or 
-  calculate it if it is the avrg of two values. Arrays stored in matrix have an
-  added element added to the end that corresponds to the number in which they 
-  were received. This allows for sorting by the last column in the matrix to 
-  preserve the order in which arrays were passed into update method. 
+  Utilizes numpy to quickly sort a matrix by column (while preserving rows) 
+  to find median value or calculate it if it is the avrg of two values. Arrays 
+  stored in matrix have an added element appended to the end that corresponds 
+  to the number in which they were received. This allows for sorting by the last 
+  column in the matrix to preserve the order in which arrays were passed into 
+  update method. Calls parent goodLength method to determine if array is allowed
+  to be processed. 
   
-
   Parameters
   inArray : a list or numpy array containing float values
   
@@ -147,19 +154,162 @@ update( self, inArray ):
 --------------------------------------------------------------------------------
 
 FILE NAME: test_Filters.py
-Desc:
+
+Project Name : Brain Corp Interview Assignment
+Created by: Mauro Chavez
+Scenario Desc: Used for testing functionality of LIDARFilter, medianFilter, and 
+rangeFilter methods and constructor under different conditions. 
+
+Fixtures:
+---------
+smallRangeFilter
+  returns a rangeFilter that is created using a LIDARFilter object that allows 
+  for scans of length 1-100 that contain values between 0.03 and 50. 
+
+smallMedianFilter
+  returns a rangeFilter that is created using a LIDARFilter object that allows 
+  for scans of length 1-100 that contain values between 0.03 and 50. 
 
 Tests:
+------
 test_each_filter_has_update PASSED
+  Desc : Testing functionality of LIDARFilter update method that throws 
+         NotImplementedError. Goal is so that any class that is a subclass of 
+         LIDARFilter must contain a complete update method. If a subclass is 
+         made that doesn't have its own update method, the NotImplementedError 
+         should be thrown. 
+  Test Input : A LIDARFilter subclass that doesn't contain an update method. 
+               An instance of that class will be made and update method called.
+  Expected Result : NotImplementedError
+  
 test_rangeFilter_update_min PASSED
+  Uses fixture: smallRangeFilter
+  Method tested: rangeFilter.update(inArray)
+  Desc : Passing a list of values that all fall below the minimum accepted range
+         value into a rangeFilter. 
+  Test Input : [-0.02,0.02,-0.02,0.0299999999] into rangeFilter update method
+  Expected Result : [0.03,0.03,0.03,0.03]
+  
 test_rangeFilter_update_max PASSED
+  Uses fixture: smallRangeFilter
+  Method tested: rangeFilter.update(inArray)
+  Desc : Passing a list of values that all fall above the minimum accepted range
+         value into a rangeFilter. 
+  Test Input : [51.0,50.5,99.0,50.0]
+  Expected Result : [50.0,50.0,50.0,50.0]
+  
 test_rangeFilter_longArray PASSED
+  Uses fixture: smallRangeFilter
+  Method tested: rangeFilter.update(inArray)
+  Desc : Passing array that falls outside range of accepted scan lengths into 
+         update method. Input array too long.
+  Test Input : [0]*101
+  Expected Result : -1 (error code for bad input )
+  
 test_rangeFilter_shortArray PASSED
+  Uses fixture: smallRangeFilter
+  Method tested: rangeFilter.update(inArray)
+  Desc : Passing array that falls outside range of accepted scan lengths into 
+         update method. Input array too short. 
+  Test Input : [0]
+  Expected Result : -1 (error code for bad input ) 
+  
 test_rangeFilter_numpyArray_preservation PASSED
+  Uses fixture: smallRangeFilter
+  Method tested: rangeFilter.update(inArray)
+  Desc : It was unclear the form in which input arrays would come in. My update
+         method was made to handle the two common types of arrays in Python,
+         lists and numpy arrays, and preserve the type of the input argument 
+         in the returned array. 
+  Test Input: np.array([0.02,1.0,51])
+  Expected Result : That the type of the array returned by update is a numpy
+                    array 
+  
 test_medianFilter_shortArray PASSED
+  Uses fixture: smallMedianFilter
+  Method tested: medianFilter.update(inArray)
+  Desc : Passing array that falls outside range of accepted scan lengths into 
+         update method. Input array too short. 
+  Test Input : [0]
+  Expected Result : -1 (error code for bad input ) 
+
 test_medianFilter_longArray PASSED
+  Uses fixture: smallMedianFilter
+  Method tested: medianFilter.update(inArray)
+  Desc : Passing array that falls outside range of accepted scan lengths into 
+         update method. Input array too long.
+  Test Input : [0]*101
+  Expected Result : -1 (error code for bad input )
+
 test_medianFilter_inconsistent_arraySize PASSED
+  Uses fixture: smallMedianFilter
+  Method tested: medianFilter.update(inArray)
+  Desc : Calculating the median requires a vector or a matrix so in the case of
+         scans each scan(or input array) must be of the same length. If one is 
+         added to the set that median is calculated from that does not match the 
+         length of all other vectors in that set, an error code of -1 is 
+         returned. 
+  Test Input : [1,1,1,1] into update method followed by [0]*20 into update 
+                method. 
+  Expected Result : -1 error code. 
+
+test_medianFilter_median_is_input PASSED
+  Uses fixture: smallMedianFilter
+  Method tested: medianFilter.update(inArray)
+  Desc: Testing base case of calculating median where no arrays have been passed
+        into the median filter yet and the input is returned as the output. 
+  Test Input: [1,1,1,2]
+  Expected Result: [1,1,1,2]
+
 test_medianFilter_median_is_avrg PASSED
+  Uses fixture: smallMedianFilter
+  Method tested: medianFilter.update(inArray)
+  Desc : Testing case that the set of scans to be used for median calculation
+         is even so the median of each column is the average of the two middle 
+         values. Serves as testing one of the base cases of calculating a 
+         median. 
+  Test Input : [1,1,1,1] and [2,2,2,2] into update method
+  Expected Result : update method returning [1,1,1,1] then [1.5,1.5,1.5,1.5]
+
 test_medianFilter_median_is_middle PASSED
-test_medianFilter_example_output PASSED
+  Uses fixture: smallMedianFilter
+  Method tested: medianFilter.update(inArray)
+  Desc : Testing case that the set of scans to be used for median calculation
+         is odd so the median of each column is the middle value in the column.
+         Serves as testing one of the base cases of calculating a median. 
+  Test Input : [3,3,3,3] followed by [2,2,2,2] followed by [1,1,1,1]] into
+                update method. 
+  Expected Result : Each call to update method returning [3,3,3,3] then 
+                    [2.5,2.5,2.5,2.5] then [2,2,2,2]
+
+test_medianFilter_provided_example_output PASSED
+  Uses fixture: smallMedianFilter
+  Method tested: medianFilter.update(inArray)
+  Desc : Testing the example case for medianFilter provided in assignment 
+         documentation. 
+  Test Input : The following passed one at a time into update method
+              providedInput0 = [0.0, 1.0, 2.0, 1.0, 3.0]
+              providedInput1 = [1.0, 5.0, 7.0, 1.0, 3.0]
+              providedInput2 = [2.0, 3.0, 4.0, 1.0, 0.0]
+              providedInput3 = [3.0, 3.0, 3.0, 1.0, 3.0]
+              providedInput4 = [10.0, 2.0, 4.0, 0.0, 0.0]
+              
+              
+  Expected Result : The following returned one at a time after each call to 
+                    update method.
+                    expectedOutput0 = [0.0,1.0,2.0,1.0,3.0]
+                    expectedOutput1 = [0.5,3.0,4.5,1.0,3.0]
+                    expectedOutput2 = [1.0,3.0,4.0,1.0,3.0]
+                    expectedOutput3 = [1.5,3.0,3.5,1.0,3.0]
+                    expectedOutput4 = [2.5,3.0,4.0,1.0,1.5]
+
 test_medianFilter_numpyArray_preservation PASSED
+  Uses fixture: smallMedianFilter
+  Method tested: medianFilter.update(inArray)
+  Desc : It was unclear the form in which input arrays would come in. My update
+         method was made to handle the two common types of arrays in Python,
+         lists and numpy arrays, and preserve the type of the input argument 
+         in the returned array. 
+  Test Input : np.array([1,1,2,2])
+  Expected Result : That the type of the array returned by update is a numpy
+                    array 

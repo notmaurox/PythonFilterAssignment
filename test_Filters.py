@@ -26,7 +26,7 @@ def test_each_filter_has_update():
         def doNothing():
             print "-1"
     
-    lFilter = LIDARFilter(200,1000,0.03,50)    
+    lFilter = LIDARFilter(0,1000,0.03,50)    
     bFilter = badFilter(lFilter)
     
     with pytest.raises(NotImplementedError):
@@ -82,7 +82,14 @@ def test_medianFilter_inconsistent_arraySize(smallMedianFilter):
     receivedOutput = smallMedianFilter.update(badArray)
     
     assert expectedOutput == receivedOutput
+
+def test_medianFilter_median_is_input(smallMedianFilter):
+    inputArray = [1,1,1,2]
+    expectedOutput = [1,1,1,2]
+    receivedOutput = smallMedianFilter.update(inputArray)
     
+    assert expectedOutput == receivedOutput
+
 def test_medianFilter_median_is_avrg(smallMedianFilter):
     inputArray = [[1,1,1,1],[2,2,2,2]]
     expectedOutput = [[1,1,1,1],[1.5,1.5,1.5,1.5]]
@@ -103,7 +110,7 @@ def test_medianFilter_median_is_middle(smallMedianFilter):
         
     assert receivedOutput == expectedOutput 
 
-def test_medianFilter_example_output(smallMedianFilter):
+def test_medianFilter_provided_example_output(smallMedianFilter):
     providedInput0 = [0.0, 1.0, 2.0, 1.0, 3.0]
     providedInput1 = [1.0, 5.0, 7.0, 1.0, 3.0]
     providedInput2 = [2.0, 3.0, 4.0, 1.0, 0.0]
