@@ -1,0 +1,165 @@
+Author: Mauro Chavez
+Date: October 2, 2018
+Desc: Contains information on files LIDARFilterClass.py, medianFilter.py, 
+rangeFilter.py, and test_Filters.py written for the completion of a coding 
+challenge provided by Brain Corp as part of the interview process for a 
+python test engineer position. 
+--------------------------------------------------------------------------------
+
+FILE NAME: LIDARFilterClass.py
+Contains class: LIDARFilter
+Desc: This is a superclass to all filter types that deal with LIDAR sensor scans
+The goal was to use this class to create parent objects that can be passed into
+constructors for subclass objects. This way, if a LIDAR filter is providing 
+scans of a certain length whose values must be within a certain range, 
+any filter could be initialized using a single LIDARFilter object, and from 
+there receive the same input parameters as they will all filter scans from the 
+same LIDAR sensor. This also allows for setting up the rule that all filter
+objects must have an update method. 
+
+Class Attributes
+----------------
+rangeN : integer tuple
+    Tuple of two ints that specify the lower and upper bound of array lengths(N)
+    that are allowed for usage by filters in the form 
+    (minRangeN,maxRangeN)
+rangeDist : float tuple
+    Tuple of two ints that specify the lower and upper bounds of values or 
+    distances contained in arrays passed into filters in the form
+    (minRangeDist,maxRangeDist)
+
+Class Methods
+-------------
+__init__ (self, minRangeN, maxRangeN, minRangeDist, maxRangeDist):
+  Parameters
+    minRangeN : int
+      Smallest length array to be accepted by filters
+    maxRangeN : int
+      Longest length array to be accepted by filters
+    minRangeDist : float
+      Minimum value allowed in array
+    maxRangeDist : float
+      Maximum value allowed in array
+  Returns
+  LIDARFilter object
+
+update( self, inArray ):
+  This method allows for the rule that any class that is a subclass of a 
+  LIDARFilter must also have an update method. In order to prevent the 
+  NotImplementedError, a subclass must have its own(complete) implementation of
+  update. 
+  
+  Parameters
+  inArray : list or numpy array of floats
+    
+  Raises
+  NotImplementedError
+
+goodLength( self, inArray):
+  Parameters
+  inArray : list or numpy array of floats
+  
+  Returns
+  bool : True if length of inArray is within bounds described by 
+  (minRangeN,maxRangeN)
+  
+--------------------------------------------------------------------------------
+
+FILE NAME: rangeFilterClass.py
+
+Contains Class: rangeFilter (subclass of LIDARFilter)
+Desc: Used for passing LIDAR scans into an update method that replaces values
+below and above defined limits with the min and max of 
+
+Class Attributes
+----------------
+rangeN : tuple of ints defining accepted input array length from LIDARFilter 
+         object passed in rangeFilter constructor. 
+rangeDist : tuple of floats defining accepted input array values from LIDARFilter 
+            object passed in rangeFilter constructor.
+scansCorrected : int keeping track of number of scans corrected by filter object
+updatesMade : int keeping track of number of values corrected by filter object
+
+Class methods
+-------------
+__init__(self,LIDARFilter):
+  Parameters
+  LIDARFilter : LIDARFilter object containing rangeN and rangeDist parameters
+  
+  Returns
+  rangeFilter object
+  
+update(self, inArray ):
+  Parameters
+  inArray : list or numpy array of values as floats
+  
+  Returns
+  list or numpy array depending on type of inArray where values below 
+  rangeDist[0] are replaced with rangeDist[0] and values above rangeDist[1] are
+  replaced with rangeDist[1]
+  
+--------------------------------------------------------------------------------
+
+FILE NAME: medianFilterClass.py
+Contains Class: medianFilter (subclass of LIDARFilter)
+Desc: Used for passing LIDAR scans into an update method and returning the 
+median of the previous D scans where D is an input parameter to creating a
+medianFilter object. 
+
+Class Attributes
+----------------
+rangeN : tuple of ints defining accepted input array length from LIDARFilter 
+         object passed in rangeFilter constructor. 
+rangeDist : tuple of floats defining accepted input array values from LIDARFilter 
+           object passed in rangeFilter constructor.
+numSavedScans : integer defining the number of scans to be saved for 
+                median calculations
+savedScans : numpy matrix for saving scans
+scansProcessed : integer to track the number of scans seen by object
+scanLength : length of scans currently considered in median calculations
+
+Class methods
+-------------
+__init__(self, LIDARFilter, D):
+  Parameters
+  LIDARFilter : LIDARFilter object containing rangeN and rangeDist parameters
+  D : Integer defining the number of previous scans to be considered when 
+      calculating median across set of previous D scans + new input scan. 
+  
+  Returns
+  medianFilter Object
+      
+update( self, inArray ):
+  Utilizes numpy to quickly sort a matrix by column to find median value or 
+  calculate it if it is the avrg of two values. Arrays stored in matrix have an
+  added element added to the end that corresponds to the number in which they 
+  were received. This allows for sorting by the last column in the matrix to 
+  preserve the order in which arrays were passed into update method. 
+  
+
+  Parameters
+  inArray : a list or numpy array containing float values
+  
+  Returns
+  a list or numpy array where type matches inArray containing the median of
+  inArray and the previous savedScans number of inputs 
+  
+--------------------------------------------------------------------------------
+
+FILE NAME: test_Filters.py
+Desc:
+
+Tests:
+test_each_filter_has_update PASSED
+test_rangeFilter_update_min PASSED
+test_rangeFilter_update_max PASSED
+test_rangeFilter_longArray PASSED
+test_rangeFilter_shortArray PASSED
+test_rangeFilter_numpyArray_preservation PASSED
+test_medianFilter_shortArray PASSED
+test_medianFilter_longArray PASSED
+test_medianFilter_inconsistent_arraySize PASSED
+test_medianFilter_median_is_avrg PASSED
+test_medianFilter_median_is_middle PASSED
+test_medianFilter_example_output PASSED
+test_medianFilter_numpyArray_preservation PASSED

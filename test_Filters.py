@@ -34,28 +34,28 @@ def test_each_filter_has_update():
 
 def test_rangeFilter_update_min(smallRangeFilter):
     expectedOutput = [0.03,0.03,0.03,0.03]
-    recievedOutput = smallRangeFilter.update( [-0.02,0.02,-0.02,0.0299999999] )
-    assert recievedOutput == expectedOutput
+    receivedOutput = smallRangeFilter.update( [-0.02,0.02,-0.02,0.0299999999] )
+    assert receivedOutput == expectedOutput
     
 def test_rangeFilter_update_max(smallRangeFilter):
     expectedOutput = [50.0,50.0,50.0,50.0]
-    recievedOutput = smallRangeFilter.update( [51.0,50.5,99.0,50.0] )
+    receivedOutput = smallRangeFilter.update( [51.0,50.5,99.0,50.0] )
     
-    assert recievedOutput == expectedOutput
+    assert receivedOutput == expectedOutput
     
 def test_rangeFilter_longArray(smallRangeFilter):
     badArray = [0]*101
     expectedOutput = -1 #error code for bad input
-    recievedOutput = smallRangeFilter.update(badArray)
+    receivedOutput = smallRangeFilter.update(badArray)
     
-    assert expectedOutput == recievedOutput
+    assert expectedOutput == receivedOutput
     
 def test_rangeFilter_shortArray(smallRangeFilter):
     badArray = []
     expectedOutput = -1 #error code for bad input
-    recievedOutput = smallRangeFilter.update(badArray)
+    receivedOutput = smallRangeFilter.update(badArray)
     
-    assert expectedOutput == recievedOutput
+    assert expectedOutput == receivedOutput
     
 def test_rangeFilter_numpyArray_preservation(smallRangeFilter):
     outPut = smallRangeFilter.update( np.array([0.02,1.0,51]) )
@@ -64,44 +64,44 @@ def test_rangeFilter_numpyArray_preservation(smallRangeFilter):
 def test_medianFilter_shortArray(smallMedianFilter):
     badArray = []
     expectedOutput = -1 #error code for bad input
-    recievedOutput = smallMedianFilter.update(badArray)
+    receivedOutput = smallMedianFilter.update(badArray)
     
-    assert expectedOutput == recievedOutput
+    assert expectedOutput == receivedOutput
     
 def test_medianFilter_longArray(smallMedianFilter):
     badArray = [0]*101
     expectedOutput = -1 #error code for bad input
-    recievedOutput = smallMedianFilter.update(badArray)
+    receivedOutput = smallMedianFilter.update(badArray)
     
-    assert expectedOutput == recievedOutput
+    assert expectedOutput == receivedOutput
     
 def test_medianFilter_inconsistent_arraySize(smallMedianFilter):
     smallMedianFilter.update([1,1,1,1])
     badArray = [0]*20
     expectedOutput = -1 #error code for bad input
-    recievedOutput = smallMedianFilter.update(badArray)
+    receivedOutput = smallMedianFilter.update(badArray)
     
-    assert expectedOutput == recievedOutput
+    assert expectedOutput == receivedOutput
     
 def test_medianFilter_median_is_avrg(smallMedianFilter):
     inputArray = [[1,1,1,1],[2,2,2,2]]
     expectedOutput = [[1,1,1,1],[1.5,1.5,1.5,1.5]]
-    recievedOutput = []
+    receivedOutput = []
     
     for inputScan in inputArray:
-        recievedOutput.append( smallMedianFilter.update(inputScan) )
+        receivedOutput.append( smallMedianFilter.update(inputScan) )
         
-    assert recievedOutput == expectedOutput
+    assert receivedOutput == expectedOutput
     
 def test_medianFilter_median_is_middle(smallMedianFilter):
     inputArray = [[3,3,3,3],[2,2,2,2],[1,1,1,1]]
     expectedOutput = [[3,3,3,3],[2.5,2.5,2.5,2.5],[2,2,2,2]]
-    recievedOutput = []
+    receivedOutput = []
     
     for inputScan in inputArray:
-        recievedOutput.append( smallMedianFilter.update(inputScan) )
+        receivedOutput.append( smallMedianFilter.update(inputScan) )
         
-    assert recievedOutput == expectedOutput 
+    assert receivedOutput == expectedOutput 
 
 def test_medianFilter_example_output(smallMedianFilter):
     providedInput0 = [0.0, 1.0, 2.0, 1.0, 3.0]
@@ -120,14 +120,14 @@ def test_medianFilter_example_output(smallMedianFilter):
     
     expectedOutputList = [expectedOutput0,expectedOutput1,expectedOutput2,expectedOutput3,expectedOutput4]
     
-    recievedOutputList = []
+    receivedOutputList = []
     for inputArr in inputList:
-        recievedOutputList.append( smallMedianFilter.update(inputArr) )
+        receivedOutputList.append( smallMedianFilter.update(inputArr) )
     
-    print recievedOutputList
+    print receivedOutputList
     print expectedOutputList
     
-    assert recievedOutputList == expectedOutputList
+    assert receivedOutputList == expectedOutputList
 
 def test_medianFilter_numpyArray_preservation(smallMedianFilter):    
     outPut = smallMedianFilter.update( np.array([1,1,2,2]) )
