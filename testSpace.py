@@ -3,6 +3,8 @@ from rangeFilterClass import rangeFilter
 from medianFilterClass import medianFilter
 from LIDARFilterClass import LIDARFilter
 
+#File used for calling methods to make sure they worked as they were built
+
 class garbageFilter(LIDARFilter):
     def doNothing():
         print "doNothing method"

@@ -12,25 +12,26 @@ Desc: This is a superclass to all filter types that deal with LIDAR sensor scans
 The goal was to use this class to create parent objects that can be passed into
 constructors for subclass objects. This way, if a LIDAR filter is providing 
 scans of a certain length whose values must be within a certain range, 
-any filter could be initialized using a single LIDARFilter object, and from 
-there receive the same input parameters. This can be used to designate that 
-they will all filter scans from the same LIDAR sensor. This also allows for 
+any other filter tpye could be initialized using a single LIDARFilter object, 
+and from there receive the same input parameters. This can be used to designate 
+that they will all filter scans from the same LIDAR sensor. This also allows for 
 setting up the rule that all filter objects must have an update method by 
-having the super class update method throw a not implemented error. 
+having the super class update method throw a not implemented error, a 
+requirement specified in the assignment documentation.
 
-Class Attributes
-----------------
+LIDARFilter Attributes
+----------------------
 rangeN : integer tuple
     Tuple of two ints that specify the lower and upper bound of array lengths(N)
     that are allowed for usage by filters in the form 
     (minRangeN,maxRangeN)
 rangeDist : float tuple
-    Tuple of two ints that specify the lower and upper bounds of values or 
+    Tuple of two floats that specify the lower and upper bounds of values or 
     distances contained in arrays passed into filters in the form
     (minRangeDist,maxRangeDist)
 
-Class Methods
--------------
+LIDARFilter Methods
+-------------------
 __init__ (self, minRangeN, maxRangeN, minRangeDist, maxRangeDist):
   Parameters
     minRangeN : int
@@ -46,8 +47,8 @@ __init__ (self, minRangeN, maxRangeN, minRangeDist, maxRangeDist):
 
 update( self, inArray ):
   This method allows for the rule, stated in assignment documentation that any
-  class that is a subclass of a LIDARFilter must also have an update method. 
-  In order to prevent the NotImplementedError, a subclass must have its 
+  object that is a filter (a subclass of a LIDARFilter) must also have an update
+  method. In order to prevent the NotImplementedError, a subclass must have its 
   own(complete) implementation of update. 
   
   Parameters
@@ -62,7 +63,7 @@ goodLength( self, inArray):
   
   Returns
   bool : True if length of inArray is within bounds described by 
-  (minRangeN,maxRangeN)
+  (minRangeN,maxRangeN) aka [ self.rangeN[0] , self.rangeN[1] ]
   
 --------------------------------------------------------------------------------
 
@@ -72,8 +73,8 @@ Contains Class: rangeFilter (subclass of LIDARFilter)
 Desc: Used for passing LIDAR scans into an update method that replaces values
 below and above defined limits with the min and max of that range. 
 
-Class Attributes
-----------------
+rangeFilter Attributes
+----------------------
 rangeN : tuple of ints defining accepted input array length from LIDARFilter 
          object passed in rangeFilter constructor. 
 rangeDist : tuple of floats defining accepted input array values from LIDARFilter 
@@ -81,20 +82,20 @@ rangeDist : tuple of floats defining accepted input array values from LIDARFilte
 scansCorrected : int keeping track of number of scans corrected by filter object
 updatesMade : int keeping track of number of values corrected by filter object
 
-Class methods
--------------
+rangeFilter Methods
+-------------------
 __init__(self,LIDARFilter):
   Parameters
-  LIDARFilter : LIDARFilter object containing rangeN and rangeDist parameters
+  LIDARFilter : LIDARFilter object containing rangeN & rangeDist specifications
   
   Returns
   rangeFilter object
   
 update(self, inArray ):
 
-  Replaces values outside an acceptable value with the max of that range if 
+  Replaces values outside an acceptable range with the max of that range if 
   above and the min of that range if below. Calls parent goodLength method to 
-  determine if array is allowed to be processed. 
+  determine if array is allowed to be processed based on it's length. 
 
   Parameters
   inArray : list or numpy array of values as floats
@@ -102,7 +103,8 @@ update(self, inArray ):
   Returns
   list or numpy array depending on type of inArray where values below 
   rangeDist[0] are replaced with rangeDist[0] and values above rangeDist[1] are
-  replaced with rangeDist[1]
+  replaced with rangeDist[1]. Returns -1 if length of input array falls outside 
+  accepted range. 
   
 --------------------------------------------------------------------------------
 
@@ -112,23 +114,26 @@ Desc: Used for passing LIDAR scans into an update method and returning the
 median of the previous D scans where D is an input parameter to creating a
 medianFilter object. 
 
-Class Attributes
-----------------
+medianFilter Attributes
+-----------------------
 rangeN : tuple of ints defining accepted input array length from LIDARFilter 
          object passed in rangeFilter constructor. 
-rangeDist : tuple of floats defining accepted input array values from LIDARFilter 
-           object passed in rangeFilter constructor.
+rangeDist : tuple of floats defining accepted input array values from 
+            LIDARFilter object passed in rangeFilter constructor.
 numSavedScans : integer defining the number of scans to be saved for 
                 median calculations
-savedScans : numpy matrix for saving scans
+savedScans : numpy matrix for saving previous D scans. Input scans have extra 
+             value appended to them that represents the number in which they
+             were passed into update method. Input arrays stored as rows of 
+             matrix and medians calculated across columns excluding the last. 
 scansProcessed : integer to track the number of scans seen by object
 scanLength : length of scans currently considered in median calculations
 
-Class methods
--------------
+medianFilter methods
+--------------------
 __init__(self, LIDARFilter, D):
   Parameters
-  LIDARFilter : LIDARFilter object containing rangeN and rangeDist parameters
+  LIDARFilter : LIDARFilter object containing rangeN & rangeDist specifications
   D : Integer defining the number of previous scans to be considered when 
       calculating median across set of previous D scans + new input scan. 
   
@@ -141,15 +146,17 @@ update( self, inArray ):
   stored in matrix have an added element appended to the end that corresponds 
   to the number in which they were received. This allows for sorting by the last 
   column in the matrix to preserve the order in which arrays were passed into 
-  update method. Calls parent goodLength method to determine if array is allowed
-  to be processed. 
+  update method (from oldest to newest). Calls parent goodLength method to 
+  determine if array is allowed to be processed. 
   
   Parameters
   inArray : a list or numpy array containing float values
   
   Returns
   a list or numpy array where type matches inArray containing the median of
-  inArray and the previous savedScans number of inputs 
+  inArray and the previous savedScans number of inputs. Returns -1 if length 
+  of input array does not match length of previous scans passed into
+  median filter object or array length falls outside accepted range. 
   
 --------------------------------------------------------------------------------
 
@@ -158,7 +165,7 @@ FILE NAME: test_Filters.py
 Project Name : Brain Corp Interview Assignment
 Created by: Mauro Chavez
 Scenario Desc: Used for testing functionality of LIDARFilter, medianFilter, and 
-rangeFilter methods and constructor under different conditions. 
+rangeFilter classes and methods under different base case conditions. 
 
 Fixtures:
 ---------
@@ -186,15 +193,15 @@ test_rangeFilter_update_min PASSED
   Uses fixture: smallRangeFilter
   Method tested: rangeFilter.update(inArray)
   Desc : Passing a list of values that all fall below the minimum accepted range
-         value into a rangeFilter. 
+         value into a rangeFilter update method. 
   Test Input : [-0.02,0.02,-0.02,0.0299999999] into rangeFilter update method
   Expected Result : [0.03,0.03,0.03,0.03]
   
 test_rangeFilter_update_max PASSED
   Uses fixture: smallRangeFilter
   Method tested: rangeFilter.update(inArray)
-  Desc : Passing a list of values that all fall above the minimum accepted range
-         value into a rangeFilter. 
+  Desc : Passing a list of values that all fall above the maximum accepted range
+         value into a rangeFilter update method. 
   Test Input : [51.0,50.5,99.0,50.0]
   Expected Result : [50.0,50.0,50.0,50.0]
   
@@ -229,7 +236,7 @@ test_medianFilter_shortArray PASSED
   Uses fixture: smallMedianFilter
   Method tested: medianFilter.update(inArray)
   Desc : Passing array that falls outside range of accepted scan lengths into 
-         update method. Input array too short. 
+         medianFilter update method. Input array too short. 
   Test Input : [0]
   Expected Result : -1 (error code for bad input ) 
 
@@ -237,7 +244,7 @@ test_medianFilter_longArray PASSED
   Uses fixture: smallMedianFilter
   Method tested: medianFilter.update(inArray)
   Desc : Passing array that falls outside range of accepted scan lengths into 
-         update method. Input array too long.
+         medianFilter update method. Input array too long.
   Test Input : [0]*101
   Expected Result : -1 (error code for bad input )
 
@@ -245,9 +252,9 @@ test_medianFilter_inconsistent_arraySize PASSED
   Uses fixture: smallMedianFilter
   Method tested: medianFilter.update(inArray)
   Desc : Calculating the median requires a vector or a matrix so in the case of
-         scans each scan(or input array) must be of the same length. If one is 
-         added to the set that median is calculated from that does not match the 
-         length of all other vectors in that set, an error code of -1 is 
+         scans, each scan(or input array) must be of the same length. If an array
+         is added to the set that median is calculated from, that does not match 
+         the length of all other vectors in that set, an error code of -1 is 
          returned. 
   Test Input : [1,1,1,1] into update method followed by [0]*20 into update 
                 method. 
@@ -264,10 +271,9 @@ test_medianFilter_median_is_input PASSED
 test_medianFilter_median_is_avrg PASSED
   Uses fixture: smallMedianFilter
   Method tested: medianFilter.update(inArray)
-  Desc : Testing case that the set of scans to be used for median calculation
-         is even so the median of each column is the average of the two middle 
-         values. Serves as testing one of the base cases of calculating a 
-         median. 
+  Desc : Testing base case that the set of scans for median calculation
+         is even, so the median of each column is the average of the two middle 
+         values. 
   Test Input : [1,1,1,1] and [2,2,2,2] into update method
   Expected Result : update method returning [1,1,1,1] then [1.5,1.5,1.5,1.5]
 

@@ -1,6 +1,9 @@
 import numpy as np
 
 class LIDARFilter:
+    #Parent class of other filters that deal with LIDAR Data. 
+    #Defines rule that each subclass must have an implemented update method.
+    #Has helper method for checking if length of an input is within set range
     
     def __init__ (self, minRangeN, maxRangeN, minRangeDist, maxRangeDist):
         self.rangeN = (minRangeN,maxRangeN)
