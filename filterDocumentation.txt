@@ -1,5 +1,5 @@
 Author: Mauro Chavez
-Date: October 3rd, 2018
+Date: October 8th, 2018
 Desc: Contains information on files LIDARFilterClass.py, medianFilter.py, 
 rangeFilter.py, and test_Filters.py written for the completion of a coding 
 challenge provided by Brain Corp. as part of the interview process for a 
